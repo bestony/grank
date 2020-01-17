@@ -1,8 +1,10 @@
-from ..libs import helpers
-import pandas as pd
-import numpy as np
-import click
 import math
+
+import click
+import numpy as np
+import pandas as pd
+
+from ..libs import helpers
 
 
 def analyse_repo(owner, repository, data, config, ret_score=False):

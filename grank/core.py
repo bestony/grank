@@ -1,10 +1,14 @@
-from .script import activity, crawler, social
-from .libs import query
-from .libs import helpers
-import click
 import os
 import sys
 import warnings
+
+import click
+
+from .libs import helpers
+from .libs import query
+from .script import activity
+from .script import crawler
+from .script import social
 
 warnings.filterwarnings("ignore")
 config = None  # 配置实例

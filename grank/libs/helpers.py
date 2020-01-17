@@ -1,13 +1,14 @@
-import matplotlib.pyplot as plt
-import requests
-import os
 import configparser
 import datetime
-import click
-import re
-import pandas as pd
-import matplotlib
 import math
+import os
+import re
+
+import click
+import matplotlib
+import matplotlib.pyplot as plt
+import pandas as pd
+import requests
 
 matplotlib.use("TkAgg")
 
