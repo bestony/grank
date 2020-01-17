@@ -6,22 +6,26 @@ import click
 import math
 import re
 
-def analyse_email(data,config):
+
+def analyse_email(data, config):
     if config["social"]["askrule"] != '1':
         return False
 
     click.echo("邮件域分布：")
     # 邮箱匹配规则
-    regex_rule = re.compile('@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?')
-    ignore_mail = ['@users.noreply.github.com','']
+    regex_rule = re.compile(
+        '@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?')
+    ignore_mail = ['@users.noreply.github.com', '']
     df = pd.DataFrame(data["commitArray"])
 
-    for index,row in df.iterrows():
-        df.loc[index,"domain"] = helpers.detect_email_domain(row["author"])
+    for index, row in df.iterrows():
+        df.loc[index, "domain"] = helpers.detect_email_domain(row["author"])
 
-    click.echo(df['domain'].value_counts().drop(labels=ignore_mail,errors='ignore'))
+    click.echo(df['domain'].value_counts().drop(
+        labels=ignore_mail, errors='ignore'))
 
-    new_rule = click.prompt('请输入新的社区化识别的正则规则：',default=config["social"]["rule"])
+    new_rule = click.prompt(
+        '请输入新的社区化识别的正则规则：', default=config["social"]["rule"])
     if new_rule != '':
         if new_rule == '!':
             config["social"]["askrule"] = '0'
@@ -29,10 +33,11 @@ def analyse_email(data,config):
         else:
             config["social"]["rule"] = new_rule
             click.echo('规则设置完成！')
-    
+
     pass
 
-def analyse_repo(owner, repository, data, config, ret_score = False):
+
+def analyse_repo(owner, repository, data, config, ret_score=False):
     click.echo("开始社区化分析：%s/%s" % (owner, repository))
     pullRequestArray = data["pullRequestArray"]
     commitArray = data["commitArray"]
@@ -44,10 +49,12 @@ def analyse_repo(owner, repository, data, config, ret_score = False):
         np.zeros((len(date_range),), dtype=int), index=date_range)
 
     social_all_frame = pd.DataFrame(commitArray)
-    for index,row in social_all_frame.iterrows():
-        social_all_frame.loc[index,"domain"] = helpers.detect_email_domain(row["author"])
-        
-    social_all_frame = social_all_frame[(social_all_frame.domain != '') & (social_all_frame.domain != '@users.noreply.github.com') & (social_all_frame.date != "未标注时间")]
+    for index, row in social_all_frame.iterrows():
+        social_all_frame.loc[index, "domain"] = helpers.detect_email_domain(
+            row["author"])
+
+    social_all_frame = social_all_frame[(social_all_frame.domain != '') & (
+        social_all_frame.domain != '@users.noreply.github.com') & (social_all_frame.date != "未标注时间")]
     social_all_frame["date"] = pd.to_datetime(social_all_frame['date'])
     for index, row in social_all_frame.iterrows():
         social_all_frame.loc[index, "is_corp"] = helpers.is_corp(
@@ -98,5 +105,5 @@ def analyse_repo(owner, repository, data, config, ret_score = False):
 
     click.echo("%s/%s 的平均社区化程度为 %.2f%%" %
                (owner, repository, 100 * target_social_score))
-    
+
     return social_df
