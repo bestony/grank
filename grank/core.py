@@ -28,9 +28,11 @@ def main(token, start, stop, askrule, rule):
     """Grank Command"""
     global config
     if token or start or stop or askrule or rule:
-        config = helpers.get_config_instance(
-            token=token, start=start, stop=stop, askrule=askrule, rule=rule
-        )
+        config = helpers.get_config_instance(token=token,
+                                             start=start,
+                                             stop=stop,
+                                             askrule=askrule,
+                                             rule=rule)
     else:
         config = None
     pass
@@ -97,31 +99,31 @@ def analy(args, mode):
         for item in repository_array["repositoryArray"]:
             i += 1
             click.echo("================================")
-            click.echo(
-                "[%d/%d] %s/%s "
-                % (
-                    i,
-                    len(repository_array["repositoryArray"]),
-                    item["owner"],
-                    item["repository"],
-                )
-            )
+            click.echo("[%d/%d] %s/%s " % (
+                i,
+                len(repository_array["repositoryArray"]),
+                item["owner"],
+                item["repository"],
+            ))
             click.echo("================================")
-            if os.path.exists(
-                "output/activity/" + item["owner"] + "/" + item["repository"] + ".csv"
-            ):
+            if os.path.exists("output/activity/" + item["owner"] + "/" +
+                              item["repository"] + ".csv"):
                 click.echo("跳过")
                 continue
             if item["repository"] == "":
                 click.echo("reporitory name 为空，跳过")
                 continue
-            data = crawler.fetch_repo_data(item["owner"], item["repository"], config)
-            activity.analyse_repo(item["owner"], item["repository"], data, config)
+            data = crawler.fetch_repo_data(item["owner"], item["repository"],
+                                           config)
+            activity.analyse_repo(item["owner"], item["repository"], data,
+                                  config)
             social.analyse_email(data, config)
-            social.analyse_repo(item["owner"], item["repository"], data, config)
+            social.analyse_repo(item["owner"], item["repository"], data,
+                                config)
 
             # 生成折线图
-            helpers.generate_repository_fig(item["owner"], item["repository"], config)
+            helpers.generate_repository_fig(item["owner"], item["repository"],
+                                            config)
 
         if len(repository_array["repositoryArray"]) > 0:
             helpers.comsum_owner(owner, config)

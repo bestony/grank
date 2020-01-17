@@ -17,7 +17,8 @@ def analyse_repo(owner, repository, data, config, ret_score=False):
     end_time = config["time"]["end_time"]
     top_number = int(config["rank"]["top"])
     date_range = pd.date_range(start=start_time, end=end_time, freq="W")
-    date_series = pd.Series(np.zeros((len(date_range),), dtype=int), index=date_range)
+    date_series = pd.Series(np.zeros((len(date_range), ), dtype=int),
+                            index=date_range)
 
     click.echo("分析 PR", nl=False)
     pr_frame = pd.DataFrame(pullRequestArray)
@@ -32,36 +33,33 @@ def analyse_repo(owner, repository, data, config, ret_score=False):
     commit_frame = pd.DataFrame(commitArray)
     commit_frame = commit_frame[commit_frame.date != "未标注时间"]
     commit_frame["date"] = pd.to_datetime(commit_frame["date"])
-    commit_dstList = commit_frame.set_index("date").resample("W")["times"].sum()
+    commit_dstList = commit_frame.set_index("date").resample(
+        "W")["times"].sum()
     commit_dstList = commit_dstList.loc[start_time:end_time]
 
     click.echo(" Contributor")
     contributor_frame = pd.DataFrame(commitArray)
     contributor_frame = contributor_frame[contributor_frame.date != "未标注时间"]
     contributor_frame["date"] = pd.to_datetime(contributor_frame["date"])
-    contributor_dstList = (
-        contributor_frame.drop_duplicates(subset=["author"])
-        .set_index("date")
-        .resample("W")["times"]
-        .sum()
-    )
+    contributor_dstList = (contributor_frame.drop_duplicates(
+        subset=["author"]).set_index("date").resample("W")["times"].sum())
     contributor_dstList = contributor_dstList.loc[start_time:end_time]
 
-    new_commit_series = pd.Series(
-        np.zeros((len(date_range),), dtype=int), index=date_range
-    )
+    new_commit_series = pd.Series(np.zeros((len(date_range), ), dtype=int),
+                                  index=date_range)
     for item in commit_dstList.index:
         if item in date_series.index:
             new_commit_series[item] = commit_dstList[item]
 
-    new_pr_series = pd.Series(np.zeros((len(date_range),), dtype=int), index=date_range)
+    new_pr_series = pd.Series(np.zeros((len(date_range), ), dtype=int),
+                              index=date_range)
     for item in pr_dstList.index:
         if item in date_series.index:
             new_pr_series[item] = pr_dstList[item]
 
-    new_contributor_series = pd.Series(
-        np.zeros((len(date_range),), dtype=int), index=date_range
-    )
+    new_contributor_series = pd.Series(np.zeros((len(date_range), ),
+                                                dtype=int),
+                                       index=date_range)
     for item in contributor_dstList.index:
         if item in date_series.index:
             new_contributor_series[item] = contributor_dstList[item]
@@ -79,11 +77,8 @@ def analyse_repo(owner, repository, data, config, ret_score=False):
 
     # 计算活跃分数
     new_df["score"] = new_df.apply(
-        lambda row: math.sqrt(
-            row.pr * row.pr
-            + row.contributor * row.contributor
-            + row.commit * row.commit
-        ),
+        lambda row: math.sqrt(row.pr * row.pr + row.contributor * row.
+                              contributor + row.commit * row.commit),
         axis=1,
     )
 

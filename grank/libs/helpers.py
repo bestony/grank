@@ -20,17 +20,15 @@ def query(query, config):
         exit()
     token = config["login"]["token"]
     headers = {"Authorization": "Bearer %s" % token}
-    response = requests.post(
-        "https://api.github.com/graphql", json={"query": query}, headers=headers
-    )
+    response = requests.post("https://api.github.com/graphql",
+                             json={"query": query},
+                             headers=headers)
     if response.status_code == 200:
         return response.json()
     else:
         raise Exception(
             "Query failed to run by returning code of {}. {}".format(
-                response.status_code, query
-            )
-        )
+                response.status_code, query))
 
 
 def check_exist():
@@ -57,20 +55,25 @@ def get_config():
     pass
 
 
-def get_config_instance(
-    token=None, rule=None, start=None, stop=None, top=None, askrule=None
-):
+def get_config_instance(token=None,
+                        rule=None,
+                        start=None,
+                        stop=None,
+                        top=None,
+                        askrule=None):
     configInstance = configparser.ConfigParser()
     configInstance["login"] = {}
     configInstance["login"]["token"] = token if token is not None else ""
     configInstance["social"] = {}
-    configInstance["social"]["askrule"] = askrule if askrule is not None else "1"
+    configInstance["social"][
+        "askrule"] = askrule if askrule is not None else "1"
     configInstance["social"]["rule"] = rule if rule is not None else "corp|inc"
     configInstance["time"] = {}
-    configInstance["time"]["start_time"] = start if start is not None else "2017-01-01"
+    configInstance["time"][
+        "start_time"] = start if start is not None else "2017-01-01"
     configInstance["time"]["end_time"] = (
-        stop if stop is not None else datetime.date.today().strftime("%Y-%m-%d")
-    )  # 使用今天的日期
+        stop if stop is not None else
+        datetime.date.today().strftime("%Y-%m-%d"))  # 使用今天的日期
     configInstance["rank"] = {}
     # 默认制作前三名的综合图像
     configInstance["rank"]["top"] = top if top is not None else "3"
@@ -98,7 +101,8 @@ def has_next_page(result, mode):
     """判断是否有下一页"""
     if mode == "pr":
         if has_result(result, "pr"):
-            if result["data"]["repository"]["pullRequests"]["pageInfo"]["hasNextPage"]:
+            if result["data"]["repository"]["pullRequests"]["pageInfo"][
+                    "hasNextPage"]:
                 return True
             else:
                 return False
@@ -107,9 +111,8 @@ def has_next_page(result, mode):
 
     if mode == "commit":
         if has_result(result, "commit"):
-            if result["data"]["repository"]["ref"]["target"]["history"]["pageInfo"][
-                "hasNextPage"
-            ]:
+            if result["data"]["repository"]["ref"]["target"]["history"][
+                    "pageInfo"]["hasNextPage"]:
                 return True
             else:
                 return False
@@ -118,8 +121,7 @@ def has_next_page(result, mode):
     if mode == "repository":
         if has_result(result, "repository"):
             if result["data"]["organization"]["repositories"]["pageInfo"][
-                "hasNextPage"
-            ]:
+                    "hasNextPage"]:
                 return True
             else:
                 return False
@@ -128,7 +130,8 @@ def has_next_page(result, mode):
 
     if mode == "user_repository":
         if has_result(result, "user_repository"):
-            if result["data"]["user"]["repositories"]["pageInfo"]["hasNextPage"]:
+            if result["data"]["user"]["repositories"]["pageInfo"][
+                    "hasNextPage"]:
                 return True
             else:
                 return False
@@ -139,15 +142,16 @@ def has_next_page(result, mode):
 def get_page_cursor(result, mode):
     """判断是否有对应的结果"""
     if mode == "pr":
-        return result["data"]["repository"]["pullRequests"]["pageInfo"]["endCursor"]
+        return result["data"]["repository"]["pullRequests"]["pageInfo"][
+            "endCursor"]
 
     if mode == "commit":
-        return result["data"]["repository"]["ref"]["target"]["history"]["pageInfo"][
-            "endCursor"
-        ]
+        return result["data"]["repository"]["ref"]["target"]["history"][
+            "pageInfo"]["endCursor"]
 
     if mode == "repository":
-        return result["data"]["organization"]["repositories"]["pageInfo"]["endCursor"]
+        return result["data"]["organization"]["repositories"]["pageInfo"][
+            "endCursor"]
 
     if mode == "user_repository":
         return result["data"]["user"]["repositories"]["pageInfo"]["endCursor"]
@@ -200,15 +204,18 @@ def cover_time(time):
 
 def add_item_to_commit_array(item, blank_array):
     """针对 commit 的数组处理"""
-    blank_array.append(
-        {
-            "author": item["node"]["author"]["email"],
-            "domain": detect_email_domain(item["node"]["author"]["email"]),
-            "is_corp": False,
-            "date": cover_time(item["node"]["pushedDate"]),
-            "times": 1,
-        }
-    )
+    blank_array.append({
+        "author":
+        item["node"]["author"]["email"],
+        "domain":
+        detect_email_domain(item["node"]["author"]["email"]),
+        "is_corp":
+        False,
+        "date":
+        cover_time(item["node"]["pushedDate"]),
+        "times":
+        1,
+    })
 
 
 def add_item_to_pr_array(item, blank_array):
@@ -235,30 +242,35 @@ def export_pickle(df, part, owner, repository):
 def get_activity_average_instance():
     """获取平均值 DF 实例"""
     if not os.path.isfile("output/activity_average.pkl"):
-        pd.DataFrame(data={"repos": [], "score": []}).to_pickle(
-            "output/activity_average.pkl"
-        )
+        pd.DataFrame(data={
+            "repos": [],
+            "score": []
+        }).to_pickle("output/activity_average.pkl")
     return pd.read_pickle("output/activity_average.pkl")
 
 
 def get_social_average_instance():
     """获取活跃度平均值 DF 实例"""
     if not os.path.isfile("output/social_average.pkl"):
-        pd.DataFrame(data={"repos": [], "score": []}).to_pickle(
-            "output/social_average.pkl"
-        )
+        pd.DataFrame(data={
+            "repos": [],
+            "score": []
+        }).to_pickle("output/social_average.pkl")
     return pd.read_pickle("output/social_average.pkl")
 
 
 def set_activity_average(instance, owner, repository, score):
     """保存中间值，并更新 csv 文件"""
     instance = instance.append(
-        pd.Series({"owner": owner, "repos": repository, "score": score}),
+        pd.Series({
+            "owner": owner,
+            "repos": repository,
+            "score": score
+        }),
         ignore_index=True,
     )
     instance = instance.drop_duplicates(subset=["owner", "repos"]).sort_values(
-        ["score"], ascending=False
-    )
+        ["score"], ascending=False)
     instance.to_pickle("output/activity_average.pkl")
     instance.to_csv("result/activity_rank.csv", float_format="%.2f")
 
@@ -267,12 +279,15 @@ def set_social_average(instance, owner, repository, score):
     """保存中间值，并更新 csv 文件"""
 
     instance = instance.append(
-        pd.Series({"owner": owner, "repos": repository, "score": score}),
+        pd.Series({
+            "owner": owner,
+            "repos": repository,
+            "score": score
+        }),
         ignore_index=True,
     )
     instance = instance.drop_duplicates(subset=["owner", "repos"]).sort_values(
-        ["score"], ascending=False
-    )
+        ["score"], ascending=False)
 
     instance.to_pickle("output/social_average.pkl")
     instance.to_csv("result/social_rank.csv", float_format="%.2f")
@@ -283,31 +298,27 @@ def comsum_owner(owner, config):
     start_time = config["time"]["start_time"]
     end_time = config["time"]["end_time"]
 
-    activity_df = pd.DataFrame(
-        {}, index=pd.date_range(start=start_time, end=end_time, freq="W")
-    )
-    social_df = pd.DataFrame(
-        {}, index=pd.date_range(start=start_time, end=end_time, freq="W")
-    )
+    activity_df = pd.DataFrame({},
+                               index=pd.date_range(start=start_time,
+                                                   end=end_time,
+                                                   freq="W"))
+    social_df = pd.DataFrame({},
+                             index=pd.date_range(start=start_time,
+                                                 end=end_time,
+                                                 freq="W"))
 
     list = os.listdir("output/activity/" + owner)
     for i in range(0, len(list)):
         path = os.path.join("output/activity/" + owner, list[i])
-        if (
-            os.path.isfile(path)
-            and os.path.splitext(list[i])[1] == ".pkl"
-            and list[i] != "-ALL-.pkl"
-        ):
-            activity_df = activity_df.add(
-                pd.read_pickle("output/activity/%s/%s" % (owner, list[i])), fill_value=0
-            )
+        if (os.path.isfile(path) and os.path.splitext(list[i])[1] == ".pkl"
+                and list[i] != "-ALL-.pkl"):
+            activity_df = activity_df.add(pd.read_pickle(
+                "output/activity/%s/%s" % (owner, list[i])),
+                                          fill_value=0)
 
     activity_df["score"] = activity_df.apply(
-        lambda row: math.sqrt(
-            row.pr * row.pr
-            + row.contributor * row.contributor
-            + row.commit * row.commit
-        ),
+        lambda row: math.sqrt(row.pr * row.pr + row.contributor * row.
+                              contributor + row.commit * row.commit),
         axis=1,
     )
     export_csv(activity_df, "activity", owner, "-ALL-")
@@ -316,18 +327,15 @@ def comsum_owner(owner, config):
     list = os.listdir("output/social/" + owner)
     for i in range(0, len(list)):
         path = os.path.join("output/social/" + owner, list[i])
-        if (
-            os.path.isfile(path)
-            and os.path.splitext(list[i])[1] == ".pkl"
-            and list[i] != "-ALL-.pkl"
-        ):
-            social_df = social_df.add(
-                pd.read_pickle("output/social/%s/%s" % (owner, list[i])), fill_value=0
-            )
+        if (os.path.isfile(path) and os.path.splitext(list[i])[1] == ".pkl"
+                and list[i] != "-ALL-.pkl"):
+            social_df = social_df.add(pd.read_pickle("output/social/%s/%s" %
+                                                     (owner, list[i])),
+                                      fill_value=0)
 
-    social_df["score"] = social_df.apply(
-        lambda row: row.community_member / row.all_member, axis=1
-    )
+    social_df["score"] = social_df.apply(lambda row: row.community_member / row
+                                         .all_member,
+                                         axis=1)
 
     export_csv(social_df, "social", owner, "-ALL-")
     export_pickle(social_df, "social", owner, "-ALL-")
@@ -346,31 +354,29 @@ def generate_top_fig(config):
     top_number = int(config["rank"]["top"])
 
     df = pd.read_pickle("output/activity_average.pkl")
-    activity_df = pd.DataFrame(
-        data=[], index=pd.date_range(start=start_time, end=end_time, freq="W")
-    )
-    social_df = pd.DataFrame(
-        data=[], index=pd.date_range(start=start_time, end=end_time, freq="W")
-    )
+    activity_df = pd.DataFrame(data=[],
+                               index=pd.date_range(start=start_time,
+                                                   end=end_time,
+                                                   freq="W"))
+    social_df = pd.DataFrame(data=[],
+                             index=pd.date_range(start=start_time,
+                                                 end=end_time,
+                                                 freq="W"))
 
     for index, row in df.iterrows():
         if len(activity_df.columns) < top_number:
             if not os.path.exists(
-                "output/activity/%s/%s.pkl" % (row["owner"], row["repos"])
-            ) or not os.path.exists(
-                "output/social/%s/%s.pkl" % (row["owner"], row["repos"])
-            ):
+                    "output/activity/%s/%s.pkl" %
+                (row["owner"], row["repos"])) or not os.path.exists(
+                    "output/social/%s/%s.pkl" % (row["owner"], row["repos"])):
                 continue
             activity_df[row["owner"] + "/" + row["repos"]] = pd.read_pickle(
-                "output/activity/%s/%s.pkl" % (row["owner"], row["repos"])
-            )["score"]
+                "output/activity/%s/%s.pkl" %
+                (row["owner"], row["repos"]))["score"]
             """跟随 activity """
             social_df[row["owner"] + "/" + row["repos"]] = (
-                pd.read_pickle(
-                    "output/social/%s/%s.pkl" % (row["owner"], row["repos"])
-                )["score"]
-                * 100
-            )
+                pd.read_pickle("output/social/%s/%s.pkl" %
+                               (row["owner"], row["repos"]))["score"] * 100)
         else:
             break
 
@@ -387,22 +393,21 @@ def generate_repository_fig(owner, repository, config):
     start_time = config["time"]["start_time"]
     end_time = config["time"]["end_time"]
     df = pd.read_pickle("output/activity_average.pkl")
-    all_df = pd.DataFrame(
-        data=[], index=pd.date_range(start=start_time, end=end_time, freq="W")
-    )
+    all_df = pd.DataFrame(data=[],
+                          index=pd.date_range(start=start_time,
+                                              end=end_time,
+                                              freq="W"))
 
-    if not os.path.exists(
-        "output/activity/%s/%s.pkl" % (owner, repository)
-    ) or not os.path.exists("output/social/%s/%s.pkl" % (owner, repository)):
+    if not os.path.exists("output/activity/%s/%s.pkl" %
+                          (owner, repository)) or not os.path.exists(
+                              "output/social/%s/%s.pkl" % (owner, repository)):
         click.echo("cant read pkl")
         return False
 
-    all_df["activity"] = pd.read_pickle(
-        "output/activity/%s/%s.pkl" % (owner, repository)
-    )["score"]
-    all_df["social"] = (
-        pd.read_pickle("output/social/%s/%s.pkl" % (owner, repository))["score"] * 100
-    )
+    all_df["activity"] = pd.read_pickle("output/activity/%s/%s.pkl" %
+                                        (owner, repository))["score"]
+    all_df["social"] = (pd.read_pickle("output/social/%s/%s.pkl" %
+                                       (owner, repository))["score"] * 100)
 
     fig, ax1 = plt.subplots()
     color = "tab:red"
